@@ -1,0 +1,75 @@
+{
+  "name": "vdom-patch",
+  "version": "0.0.1",
+  "description": "Package that allows applying virtual-dom diffs to a VNode tree instead of live DOM",
+  "keywords": [
+    "virtual",
+    "dom",
+    "vdom",
+    "vtree",
+    "diff",
+    "patch",
+    "browser"
+  ],
+  "author": "Andrew Delpha <andrew.delpha@gmail.com>",
+  "repository": "git://github.com/lightman76/vdom-patch",
+  "main": "index",
+  "homepage": "https://github.com/lightman76/vdom-patch",
+  "contributors": [
+    {
+      "name": "Andrew Delpha"
+    }
+  ],
+  "bugs": {
+    "url": "https://github.com/lightman76/vdom-patch/issues",
+    "email": "andrew.delpha@gmail.com"
+  },
+  "dependencies": {
+    "virtual-dom": "^2.1.1",
+    "is-object": "^1.0.1",
+    "x-is-array": "0.1.0"
+  },
+  "devDependencies": {
+    "browserify": "^9.0.7",
+    "istanbul": "^0.3.13",
+    "min-document": "^2.14.0",
+    "opn": "^1.0.1",
+    "run-browser": "^2.0.2",
+    "tap-dot": "^1.0.0",
+    "tap-spec": "^3.0.0",
+    "tape": "^4.0.0",
+    "zuul": "^2.1.1"
+  },
+  "license": "MIT",
+  "scripts": {
+    "test": "node ./vdom/test/index.js | tap-spec",
+    "dot": "node ./vdom/test/index.js | tap-dot",
+    "start": "node ./index.js",
+    "cover": "istanbul cover --report html --print detail ./vdom/test/index.js",
+    "view-cover": "istanbul report html && opn ./coverage/index.html",
+    "browser": "run-browser vdom/test/index.js",
+    "phantom": "run-browser vdom/test/index.js -b | tap-spec",
+    "dist": "browserify --standalone virtual-dom index.js > dist/virtual-dom.js",
+    "travis-test": "npm run phantom && npm run cover && istanbul report lcov && ((cat coverage/lcov.info | coveralls) || exit 0)",
+    "release": "npm run release-patch",
+    "release-patch": "git checkout master && npm version patch && git push origin master --tags && npm publish",
+    "release-minor": "git checkout master && npm version minor && git push origin master --tags && npm publish",
+    "release-major": "git checkout master && npm version major && git push origin master --tags && npm publish"
+  },
+  "testling": {
+    "files": "vdom/test/*.js",
+    "browsers": [
+      "ie/8..latest",
+      "firefox/17..latest",
+      "firefox/nightly",
+      "chrome/22..latest",
+      "chrome/canary",
+      "opera/12..latest",
+      "opera/next",
+      "safari/5.1..latest",
+      "ipad/6.0..latest",
+      "iphone/6.0..latest",
+      "android-browser/4.2..latest"
+    ]
+  }
+}
