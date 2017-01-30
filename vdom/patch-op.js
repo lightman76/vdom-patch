@@ -10,38 +10,38 @@ var updateWidget = require("./update-widget")
 
 module.exports = applyPatch
 
-function applyPatch(vpatch, targetVdomNode, renderOptions) {
+function applyPatch(vpatch, targetVdomNode, targetVdomParentNode, renderOptions) {
   var type = vpatch.type
   var vNode = vpatch.vNode
   var patch = vpatch.patch
 
   switch (type) {
     case VPatch.REMOVE:
-      return removeNode(targetVdomNode, vNode)
+      return removeNode(targetVdomNode, targetVdomParentNode, vNode)
     case VPatch.INSERT:
-      return insertNode(targetVdomNode, patch, renderOptions)
+      return insertNode(targetVdomNode, targetVdomParentNode, patch, renderOptions)
     case VPatch.VTEXT:
-      return stringPatch(targetVdomNode, vNode, patch, renderOptions)
+      return stringPatch(targetVdomNode, targetVdomParentNode, vNode, patch, renderOptions)
     case VPatch.WIDGET:
-      return widgetPatch(targetVdomNode, vNode, patch, renderOptions)
+      return widgetPatch(targetVdomNode, targetVdomParentNode, vNode, patch, renderOptions)
     case VPatch.VNODE:
-      return vNodePatch(targetVdomNode, vNode, patch, renderOptions)
+      return vNodePatch(targetVdomNode, targetVdomParentNode, vNode, patch, renderOptions)
     case VPatch.ORDER:
-      reorderChildren(targetVdomNode, patch)
+      reorderChildren(targetVdomNode, targetVdomParentNode, patch)
       return targetVdomNode
     case VPatch.PROPS:
-      applyProperties(targetVdomNode, patch, vNode.properties)
+      applyProperties(targetVdomNode, targetVdomParentNode, patch, vNode.properties)
       return targetVdomNode
     case VPatch.THUNK:
-      return replaceRoot(targetVdomNode,
+      return replaceRoot(targetVdomNode, targetVdomParentNode,
           renderOptions.patch(targetVdomNode, patch, renderOptions))
     default:
       return targetVdomNode
   }
 }
 
-function removeNode(targetVdomNode, vNode) {
-  var parentNode = targetVdomNode.parentVnode
+function removeNode(targetVdomNode, targetVdomParentNode, vNode) {
+  var parentNode = targetVdomParentNode;
 
   if (parentNode) {
     var idx = parentNode.children.indexOf(targetVdomNode)
@@ -53,7 +53,7 @@ function removeNode(targetVdomNode, vNode) {
   return null
 }
 
-function insertNode(targetVdomNode, vNode, renderOptions) {
+function insertNode(targetVdomNode, targetVdomParentNode, vNode, renderOptions) {
   var newNode = renderOptions.render(vNode, renderOptions)
 
   if (targetVdomNode) {
@@ -63,14 +63,14 @@ function insertNode(targetVdomNode, vNode, renderOptions) {
   return targetVdomNode
 }
 
-function stringPatch(targetVdomNode, leftVNode, vText, renderOptions) {
+function stringPatch(targetVdomNode, targetVdomParentNode, leftVNode, vText, renderOptions) {
   var newNode
 
   if (targetVdomNode.type === "VirtualText") {
     targetVdomNode.text = vText.text;
     newNode = targetVdomNode
   } else {
-    var parentNode = targetVdomNode.parentVnode
+    var parentNode = targetVdomParentNode
     newNode = renderOptions.render(vText, renderOptions)
 
     if (parentNode && newNode !== targetVdomNode) {
@@ -82,7 +82,7 @@ function stringPatch(targetVdomNode, leftVNode, vText, renderOptions) {
   return newNode
 }
 
-function widgetPatch(targetVdomNode, leftVNode, widget, renderOptions) {
+function widgetPatch(targetVdomNode, targetVdomParentNode, leftVNode, widget, renderOptions) {
   var updating = updateWidget(leftVNode, widget)
   var newNode
 
@@ -92,7 +92,7 @@ function widgetPatch(targetVdomNode, leftVNode, widget, renderOptions) {
     newNode = renderOptions.render(widget, renderOptions)
   }
 
-  var parentNode = targetVdomNode.parentVNode
+  var parentNode = targetVdomParentNode
 
   if (parentNode && newNode !== targetVdomNode) {
     var idx = parentNode.children.indexOf(targetVdomNode);
@@ -106,11 +106,11 @@ function widgetPatch(targetVdomNode, leftVNode, widget, renderOptions) {
   return newNode
 }
 
-function vNodePatch(domNode, leftVNode, vNode, renderOptions) {
-  var parentNode = domNode.parentVNode
+function vNodePatch(targetVdomNode, targetVdomParentNode, leftVNode, vNode, renderOptions) {
+  var parentNode = targetVdomParentNode
   var newNode = renderOptions.render(vNode, renderOptions)
 
-  if (parentNode && newNode !== domNode) {
+  if (parentNode && newNode !== targetVdomNode) {
     var idx = parentNode.children.indexOf(targetVdomNode);
     if (idx >= 0) parentNode.children[idx] = newNode;
   }
@@ -124,7 +124,7 @@ function destroyWidget(targetVdomNode, w) {
   }
 }
 
-function reorderChildren(targetVdomNode, moves) {
+function reorderChildren(targetVdomNode, targetVdomParentNode, moves) {
   var childNodes = targetVdomNode.children
   var keyMap = {}
   var node
@@ -154,11 +154,11 @@ function reorderChildren(targetVdomNode, moves) {
   }
 }
 
-function replaceRoot(oldRootVNode, newRootVNode) {
-  if (oldRootVNode && newRootVNode && oldRootVNode !== newRootVNode && oldRootVNode.parentNode) {
-    var idx = oldRootVNode.parentVNode.children.indexOf(oldRootVNode);
+function replaceRoot(oldRootVNode, targetVdomParentNode, newRootVNode) {
+  if (oldRootVNode && newRootVNode && oldRootVNode !== newRootVNode && targetVdomParentNode) {
+    var idx = targetVdomParentNode.children.indexOf(oldRootVNode);
     if (idx >= 0) {
-      oldRootVNode.parentVNode.children.splice(idx, 1, newRootVNode)
+      targetVdomParentNode.children.splice(idx, 1, newRootVNode)
     }
 
   }

@@ -3,7 +3,7 @@ var isHook = require('virtual-dom/vnode/is-vhook.js');
 
 module.exports = applyProperties
 
-function applyProperties(targetVNode, props, previous) {
+function applyProperties(targetVNode, targetVdomParentNode, props, previous) {
   for (var propName in props) {
     var propValue = props[propName]
 

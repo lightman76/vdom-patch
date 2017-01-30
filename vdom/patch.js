@@ -30,6 +30,7 @@ function patchRecursive(rootNode, patches, renderOptions) {
     var nodeIndex = indices[i]
     rootNode = applyPatch(rootNode,
         index[nodeIndex],
+        index["p" + nodeIndex],
         patches[nodeIndex],
         renderOptions)
   }
@@ -37,7 +38,7 @@ function patchRecursive(rootNode, patches, renderOptions) {
   return rootNode
 }
 
-function applyPatch(rootNode, targetVdomNode, patchList, renderOptions) {
+function applyPatch(rootNode, targetVdomNode, targetVdomParentNode, patchList, renderOptions) {
   if (!targetVdomNode) {
     return rootNode
   }
@@ -46,14 +47,14 @@ function applyPatch(rootNode, targetVdomNode, patchList, renderOptions) {
 
   if (isArray(patchList)) {
     for (var i = 0; i < patchList.length; i++) {
-      newNode = patchOp(patchList[i], targetVdomNode, renderOptions)
+      newNode = patchOp(patchList[i], targetVdomNode, targetVdomParentNode, renderOptions)
 
       if (targetVdomNode === rootNode) {
         rootNode = newNode
       }
     }
   } else {
-    newNode = patchOp(patchList, targetVdomNode, renderOptions)
+    newNode = patchOp(patchList, targetVdomNode, targetVdomParentNode, renderOptions)
 
     if (targetVdomNode === rootNode) {
       rootNode = newNode
