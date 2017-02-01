@@ -30,7 +30,7 @@ function createElement(vnode, opts) {
 
 
   var props = vnode.properties
-  applyProperties(targetVNode, props)
+  applyProperties(targetVNode, null, props)
 
   var children = vnode.children
 
